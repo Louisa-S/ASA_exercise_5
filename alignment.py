@@ -1,5 +1,9 @@
 import sys
 
+acidcode = ["A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V", "B", "Z", "X"]
+indelcost = -10
+
+
 def  local_al(T, s, t, matrix):
 	
 	m = len(s)
@@ -8,30 +12,27 @@ def  local_al(T, s, t, matrix):
 	maxi = (0,0,0) #pos i, pos j, score
 	
 	  # create  empty  matrix
-	
-	
 	T.append([(0, "l")] * (m+1))
 
 	for i in range(1, n+1):
 		T.append([(None, None)] * (m+1)) # add  empty  row i
 		T[i][0] = (0, "u") # init 0th  column  of row i
-		
 
 		for j in range(1, m+1):
 			sco = score(t[i-1], s[j-1], matrix)
-			maximum = max(0, T[i-1][j-1][0] + sco, T[i-1][j][0] -10, T[i][j-1][0] -10)
-			ind = [0, T[i-1][j-1][0] + sco, T[i-1][j][0] -10, T[i][j-1][0] -10].index(maximum)
+			maximum = max(0, T[i-1][j-1][0] + sco, T[i-1][j][0] + indelcost, T[i][j-1][0] +indelcost)
+			ind = [0, T[i-1][j-1][0] + sco, T[i-1][j][0] +indelcost, T[i][j-1][0] +indelcost].index(maximum)
 			T[i][j] = (maximum, getdirection(ind))
 			
 			if T[i][j][0] > maxi[2]:
 				maxi = (i, j, T[i][j][0])
 				
-	
 	return maxi
 
 
 def score(c1, c2, matrix):
 	return int(matrix[getindex(c1)][getindex(c2)])
+
 
 def getdirection(pos):
 	if pos == 1:
@@ -42,20 +43,14 @@ def getdirection(pos):
 		return "l"
 	else: return "undef"
 	
-
 	
 def readmatrix(f):
 	matrix = []
 	
-	next(f)
-	next(f)
-	next(f)
-	next(f)
-	next(f)
-	next(f)
-	next(f)
 	for line in f:
 		
+		if line[0] == "#" or line[0] == ' ':
+			continue
 		
 		if line == "\n":
 			break
@@ -69,8 +64,7 @@ def readmatrix(f):
 			
 	
 def getindex(c):
-	l = ["A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V", "B", "Z", "X"] 
-	return l.index(c)
+	return acidcode.index(c)
 	
 
 def getstring(T, s, t, maxi):
@@ -79,9 +73,7 @@ def getstring(T, s, t, maxi):
 	
 	start = T[i][j]
 	ress = ""
-	#ress += s[j]
 	rest = ""
-	#rest += t[i]
 	
 	while(start[0] != 0):
 		
@@ -103,6 +95,7 @@ def getstring(T, s, t, maxi):
 		
 		 
 	return ress[::-1], rest[::-1]
+
 	
 #main
 with open(str(sys.argv[3])) as f:
