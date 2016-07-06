@@ -1,17 +1,20 @@
 import sys
 
+# Define single-letter acid code
 acidcode = ["A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V", "B", "Z", "X"]
+# Define indel cost
 indelcost = -10
 
-
+# Core algorithm running a O(n^2), dynamic programming approach to find all alignments
 def  local_al(T, s, t, matrix):
 	
+	# Define n x m
 	m = len(s)
 	n = len(t)
 
 	maxi = (0,0,0) #pos i, pos j, score
 	
-	  # create  empty  matrix
+	# create  empty  matrix
 	T.append([(0, "l")] * (m+1))
 
 	for i in range(1, n+1):
@@ -19,21 +22,24 @@ def  local_al(T, s, t, matrix):
 		T[i][0] = (0, "u") # init 0th  column  of row i
 
 		for j in range(1, m+1):
+			
+			# fill in next cell of matrix
 			sco = score(t[i-1], s[j-1], matrix)
 			maximum = max(0, T[i-1][j-1][0] + sco, T[i-1][j][0] + indelcost, T[i][j-1][0] +indelcost)
 			ind = [0, T[i-1][j-1][0] + sco, T[i-1][j][0] +indelcost, T[i][j-1][0] +indelcost].index(maximum)
 			T[i][j] = (maximum, getdirection(ind))
 			
+			# found another maximum? save it
 			if T[i][j][0] > maxi[2]:
 				maxi = (i, j, T[i][j][0])
 				
 	return maxi
 
-
+# Read score from BLOSUM matrix by character index.
 def score(c1, c2, matrix):
 	return int(matrix[getindex(c1)][getindex(c2)])
 
-
+# Map positions to directions in the n x m matrix
 def getdirection(pos):
 	if pos == 1:
 		return "d"
@@ -43,7 +49,7 @@ def getdirection(pos):
 		return "l"
 	else: return "undef"
 	
-	
+# Reads in the scoring matrix	
 def readmatrix(f):
 	matrix = []
 	
@@ -61,12 +67,11 @@ def readmatrix(f):
 		
 	return matrix
 			
-			
-	
+# Returns the index of a single-letter aminoacid code in the score matrix
 def getindex(c):
 	return acidcode.index(c)
 	
-
+# Extracts the final alignment for the best score and returns both aligned strings T1 and T2
 def getstring(T, s, t, maxi):
 	i = maxi[0]
 	j = maxi[1]
@@ -97,7 +102,17 @@ def getstring(T, s, t, maxi):
 	return ress[::-1], rest[::-1]
 
 	
-#main
+#####
+# MAIN:
+# ARGUMENTS:
+# 1. String of Text T1
+# 2. String of Text T2
+# 3. Path to BLOSUM matrix. e.g. ~/Documents/BLOSUM.txt
+#
+# Program description:
+# - OPEN SCORE MATRIX AND RUN LOCAL ALIGNMENT
+# - GET ALIGNED STRINGS AND BEST SCORE AND PRINT IT
+#####
 with open(str(sys.argv[3])) as f:
 	matrix = readmatrix(f)
 
